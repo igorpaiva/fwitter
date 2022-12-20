@@ -1,12 +1,13 @@
 package com.fwitter.controllers;
 
+import com.fwitter.exceptions.EmailAlreadyTakenException;
 import com.fwitter.models.ApplicationUser;
+import com.fwitter.models.RegistrationObject;
 import com.fwitter.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -19,10 +20,15 @@ public class AuthenticationController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ApplicationUser registerUser(@RequestBody ApplicationUser applicationUser) {
+    @ExceptionHandler({EmailAlreadyTakenException.class})
+    public ResponseEntity<String> handleEmailTaken() {
+        return new ResponseEntity<String>("The email you provided is already in use.", HttpStatus.CONFLICT);
+    }
 
-        return userService.registerUser(applicationUser);
+    @PostMapping("/register")
+    public ApplicationUser registerUser(@RequestBody RegistrationObject registrationObject){
+
+        return userService.registerUser(registrationObject);
     }
 
 }

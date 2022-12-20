@@ -1,6 +1,8 @@
 package com.fwitter.services;
 
+import com.fwitter.exceptions.EmailAlreadyTakenException;
 import com.fwitter.models.ApplicationUser;
+import com.fwitter.models.RegistrationObject;
 import com.fwitter.models.Role;
 import com.fwitter.repositories.RoleRepository;
 import com.fwitter.repositories.UserRepository;
@@ -21,11 +23,40 @@ public class UserService {
         this.roleRepository = roleRepository;
     }
 
-    public ApplicationUser registerUser(ApplicationUser applicationUser) {
-        Set<Role> roles = applicationUser.getAuthorities();
-        roles.add(roleRepository.findByAuthority("USER").get());
-        applicationUser.setAuthorities(roles);
+    public ApplicationUser registerUser(RegistrationObject registrationObject){
 
-        return userRepository.save(applicationUser);
+        ApplicationUser applicationUser = new ApplicationUser();
+
+        applicationUser.setFirstName(registrationObject.getFirstName());
+        applicationUser.setLastName(registrationObject.getLastName());
+        applicationUser.setEmail(registrationObject.getEmail());
+        applicationUser.setDateOfBirth(registrationObject.getDateOfBirth());
+
+        String username = applicationUser.getFirstName() + applicationUser.getLastName();
+
+        boolean nameTaken = true;
+
+        String tempName = "";
+        while(nameTaken) {
+            tempName = generateUsername(username);
+            if (userRepository.findByUsername(tempName).isEmpty()) {
+                nameTaken = false;
+            }
+        }
+
+        applicationUser.setUsername(tempName);
+
+        try {
+            return userRepository.save(applicationUser);
+        } catch (Exception exception) {
+            throw new EmailAlreadyTakenException();
+        }
+
+    }
+
+    private String generateUsername(String username) {
+        //Generates a 9 digit number
+        long generatedNumber = (long) Math.floor(Math.random() * 1_000_000_000);
+        return username+generatedNumber;
     }
 }
