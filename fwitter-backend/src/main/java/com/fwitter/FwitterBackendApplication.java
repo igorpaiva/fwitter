@@ -4,6 +4,7 @@ import com.fwitter.models.ApplicationUser;
 import com.fwitter.models.Role;
 import com.fwitter.repositories.RoleRepository;
 import com.fwitter.repositories.UserRepository;
+import com.fwitter.services.UserService;
 import org.apache.catalina.User;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -19,20 +20,9 @@ public class FwitterBackendApplication {
 	}
 
 	@Bean
-	CommandLineRunner run(RoleRepository roleRepository, UserRepository userRepository) {
+	CommandLineRunner run(RoleRepository roleRepository, UserService userService) {
 		return args -> {
-			Role role = new Role();
-			role.setRoleId(1);
-			role.setAuthority("USER");
-			roleRepository.save(role);
-
-			ApplicationUser user = new ApplicationUser();
-			user.setFirstName("unknown");
-			user.setLastName("nwonknu");
-			HashSet<Role> roles = new HashSet<>();
-			roles.add(roleRepository.findByAuthority("USER").get());
-			user.setAuthorities(roles);
-			userRepository.save(user);
+			roleRepository.save(new Role(1, "USER"));
 		};
 	}
 
