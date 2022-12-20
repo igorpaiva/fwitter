@@ -1,6 +1,7 @@
 package com.fwitter.services;
 
 import com.fwitter.exceptions.EmailAlreadyTakenException;
+import com.fwitter.exceptions.UserDoesNotExistException;
 import com.fwitter.models.ApplicationUser;
 import com.fwitter.models.RegistrationObject;
 import com.fwitter.models.Role;
@@ -21,6 +22,18 @@ public class UserService {
     public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+    }
+
+    public ApplicationUser getUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(UserDoesNotExistException::new);
+    }
+
+    public ApplicationUser updateUser(ApplicationUser applicationUser) {
+        try {
+            return userRepository.save(applicationUser);
+        } catch(Exception exception) {
+            throw new EmailAlreadyTakenException();
+        }
     }
 
     public ApplicationUser registerUser(RegistrationObject registrationObject){
